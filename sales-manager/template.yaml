@@ -6,93 +6,42 @@ Transform:
 
 Resources:
   # -------------
+  # Ingredient functions
   # -------------
-  getAllItemsFunction:
+  postIngredientFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/get-all-items.getAllItemsHandler
+      FunctionName: postIngredientFunction
+      Handler: src/ingredient/postIngredient.handler
       Runtime: nodejs20.x
       Architectures:
       - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: Gets all items from database
-      Policies:
-      - DynamoDBReadOmlyPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          SAMPLE_TABLE: !Ref SampleTable
+      Description: Saves an ingredient to database
+      Policies: 
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:us-east-1:975050294854:secret:rds!db-40cc679a-fa7f-4db8-8e92-8a774bece408-NS9ggO
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0b233602b92cd70f7
+          - sg-0dd05095cd5969f99
+          - sg-04e86fcb5d64f05f3
+        SubnetIds:
+          - subnet-08ba2630ed2ad5086
+          - subnet-0a22fbe0af86e0a37
+          - subnet-0be71766173a5d34a
+          - subnet-0f692d61e6b80a341
+          - subnet-0a1beb2d590107236
+          - subnet-021e9ce96b9235bf7
       Events:
         Api:
           Type: Api
           Properties:
-            Path: /
-            Method: GET
-  # -------------
-  # -------------
-  getByIdFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/get-by-id.getByIdHandler
-      Runtime: nodejs20.x
-      Architectures:
-      - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: A simple example includes a HTTP get method to get one item by
-        id from a DynamoDB table.
-      Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBReadOnlyPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          SAMPLE_TABLE: !Ref SampleTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /{id}
-            Method: GET
-
-  # -------------
-  # -------------
-  putItemFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/put-item.putItemHandler
-      Runtime: nodejs20.x
-      Architectures:
-      - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: A simple example includes a HTTP post method to add one item to
-        a DynamoDB table.
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          SAMPLE_TABLE: !Ref SampleTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /
+            Path: /ingredient
             Method: POST
- 
   # -------------
-  # -------------
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+  # ------------- 
 
 Outputs:
   WebEndpoint:
@@ -103,3 +52,24 @@ Globals:
   Function:
     LoggingConfig:
       LogFormat: JSON
+    Environment:
+      Variables:
+        REGION_NAME: "us-east-1"
+        POSTGRES_HOST: "sales-manager.cjg402isk8rb.us-east-1.rds.amazonaws.com"
+        POSTGRES_DATABASE: "postgres"
+        POSTGRES_PASSWORD: "e8(R*3brH[_:6r?%okK>gz9PF3UU"
+        POSTGRES_USER: "postgres"
+        POSTGRES_PORT: 5432
+    #VpcConfig:
+        #SecurityGroupIds:
+        #  - sg-0b233602b92cd70f7
+        #  - sg-04e86fcb5d64f05f3
+        #  - sg-07214d32a9a6eff3f
+        #  - sg-0dd05095cd5969f99
+        #SubnetIds:
+        #  - subnet-08ba2630ed2ad5086
+        #  - subnet-0a22fbe0af86e0a37
+        #  - subnet-0be71766173a5d34a
+        #  - subnet-0f692d61e6b80a341
+        #  - subnet-0a1beb2d590107236
+        #  - subnet-021e9ce96b9235bf7
