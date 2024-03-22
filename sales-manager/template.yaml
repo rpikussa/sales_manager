@@ -11,7 +11,7 @@ Resources:
   postIngredientFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: postIngredientFunction
+      FunctionName: PostIngredientFunction
       Handler: src/ingredient/postIngredient.handler
       Runtime: nodejs20.x
       Architectures:
@@ -40,6 +40,41 @@ Resources:
           Properties:
             Path: /ingredient
             Method: POST
+  # -------------
+  # Get all Ingredient function
+  # -------------
+  getIngredientFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetIngredientFunction
+      Handler: src/ingredient/getIngredient.handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 10
+      Description: Retrieves all ingredients from database
+      Policies: 
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:us-east-1:975050294854:secret:rds!db-40cc679a-fa7f-4db8-8e92-8a774bece408-NS9ggO
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0b233602b92cd70f7
+          - sg-0dd05095cd5969f99
+          - sg-04e86fcb5d64f05f3
+        SubnetIds:
+          - subnet-08ba2630ed2ad5086
+          - subnet-0a22fbe0af86e0a37
+          - subnet-0be71766173a5d34a
+          - subnet-0f692d61e6b80a341
+          - subnet-0a1beb2d590107236
+          - subnet-021e9ce96b9235bf7
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /ingredient
+            Method: GET
   # -------------
   # ------------- 
 

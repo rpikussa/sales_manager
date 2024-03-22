@@ -1,4 +1,3 @@
-import sequelize from '../database/database.js';
 import { Ingredient } from '../model/model.js'
 export const handler = async (event) => {
 
