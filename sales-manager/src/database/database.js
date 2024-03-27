@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize')
 
-/* Local setup
+/* Local setup */
+/*
 const sequelize = new Sequelize('sales_manager', 'postgres', 'oopassword', {
     dialect: 'postgres',
     host: '172.28.74.209',

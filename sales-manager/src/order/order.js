@@ -3,24 +3,21 @@ const serverless = require("serverless-http");
 const { Ingredient } = require('../model/model.js');
 
 const app = express()
-/*
 app.use(
     express.urlencoded({
         extended: true
     })
 )
-*/
 app.use(express.json());
 
 // Get route by id with id being optional
 app.get("/ingredient/:id?", async function (req, res) {
-
-    if(typeof req.params.id === undefined || req.params.id == "undefined" || req.params.id == "" || typeof req.params.id == "undefined")
+    
+    if(typeof req.params.id === undefined)
     {
         var { count, rows } = await Ingredient.findAndCountAll()
 
     } else {
-
         var id = parseInt(req.params.id)
         var { count, rows  } = await Ingredient.findAndCountAll({
             where: {
@@ -45,14 +42,13 @@ app.post("/ingredient", async function (req, res) {
     if (req.method !== 'POST') {
         res.status(400).json(`This function only accepts POST method, you tried: ${req.method} method.`);
     }
-    console.log(req.body)
-    console.log(req)
+       
     try {
         var { name, available_quantity, description } = req.body;
     } catch (error) {
         res.status(400).json(`Failed to process your request body: ${error}`);
     }
-    console.log(name, available_quantity, description)
+    
     const responseData = await Ingredient.create({
         name: name,
         available_quantity: available_quantity,

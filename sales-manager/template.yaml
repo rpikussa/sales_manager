@@ -14,10 +14,12 @@ Resources:
       FunctionName: ManageIngredient
       Handler: src/ingredient/ingredient.handler
       Runtime: nodejs20.x
+      FunctionUrlConfig:
+        AuthType: NONE
       Architectures:
       - x86_64
       MemorySize: 128
-      Timeout: 100
+      Timeout: 10
       Description: Saves an ingredient to database
       Policies: 
         - AWSSecretsManagerGetSecretValuePolicy:
@@ -35,16 +37,83 @@ Resources:
           - subnet-0a1beb2d590107236
           - subnet-021e9ce96b9235bf7
       Events:
-        HttpApiEvent:
+        IngredientGetHttpApi:
           Type: HttpApi
+          Properties:
+            Path: /ingredient/{id}
+            Method: GET
+
+        IngredientPostHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /ingredient
+            Method: POST
+
+  
+  # -------------
+  # Product functions
+  # -------------
+  ManageProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ManageProduct
+      Handler: src/product/product.handler
+      Runtime: nodejs20.x
+      FunctionUrlConfig:
+        AuthType: NONE
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Saves a product and its related data to database
+      Policies: 
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:us-east-1:975050294854:secret:rds!db-40cc679a-fa7f-4db8-8e92-8a774bece408-NS9ggO
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0b233602b92cd70f7
+          - sg-0dd05095cd5969f99
+          - sg-04e86fcb5d64f05f3
+        SubnetIds:
+          - subnet-08ba2630ed2ad5086
+          - subnet-0a22fbe0af86e0a37
+          - subnet-0be71766173a5d34a
+          - subnet-0f692d61e6b80a341
+          - subnet-0a1beb2d590107236
+          - subnet-021e9ce96b9235bf7
+      Events:
+        ProductGetHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /product/{id}
+            Method: GET
+
+        ProductPostHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /product
+            Method: POST
+            
   
   # -------------
   # ------------- 
 
+
 #Outputs:
-#  WebEndpoint:
-#    Description: API Gateway endpoint URL for Prod stage
-#    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+#  HttpApiUrl:
+#    Description: URL of your API endpoint
+#    Value:
+#      Fn::Sub: 'https://${ApiGatewayApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${StageName}/'
+#  HttpApiId:
+#    Description: Api id of HttpApi
+#    Value:
+#      Ref: ApiGatewayApi
+
+#Outputs:
+#  FunctionUrlEndpoint:
+#      Description: "My Lambda Function URL Endpoint"
+#      Value:
+#        Fn::GetAtt: ManageProductFunctionUrl.FunctionUrl
 
 Globals:
   Function:

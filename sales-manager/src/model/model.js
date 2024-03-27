@@ -83,9 +83,9 @@ OrderItem.init(
         sequelize,
         modelName: 'order_item'
 })
-OrderItem.belongsTo(Order);
-Order.hasMany(OrderItem);
-Product.hasMany(OrderItem);    
+OrderItem.belongsTo(Order, { foreignKey: 'order_id' });
+Order.hasMany(OrderItem, { foreignKey: 'order_id' });
+Product.hasMany(OrderItem, { foreignKey: 'product_id' });    
 
 class Ingredient extends Model {}
 Ingredient.init(
@@ -109,17 +109,42 @@ Ingredient.init(
     sequelize,
     modelName: 'ingredient'
 })
-Ingredient.belongsToMany(Product, { through: 'product_compositions' });
-Product.belongsToMany(Ingredient, { through: 'product_compositions' });
 
 
-sequelize.sync().then((result) => {
+class ProductComposition extends Model {}
+ProductComposition.init(
+{
+    ingredient_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true
+    },
+    product_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true
+    },
+    quantity: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    }
+},{
+    sequelize,
+    modelName: 'product_composition'
+})
+ProductComposition.belongsTo(Product, { foreignKey: 'product_id' });
+Product.hasMany(ProductComposition, { foreignKey: 'product_id' });
+ProductComposition.belongsTo(Ingredient, { foreignKey: 'ingredient_id' });
+Ingredient.hasMany(ProductComposition, { foreignKey: 'ingredient_id' });
+
+/*
+sequelize.sync({force: true}).then((result) => {
     console.log('Success: creating database')
 })
 .catch((err)=> {
     console.log(`Error: `, err)
 });
-
+*/
 /*
 const Product = require('./Product.js')
 const newProduct = await Product.create({
@@ -134,4 +159,4 @@ const newProduct = await Product.create({
 console.log(newProduct)
 */
 
-module.exports = { Product, Order, OrderItem, Ingredient };
+module.exports = { Product, Order, OrderItem, Ingredient, ProductComposition };
