@@ -42,6 +42,10 @@ app.post("/order", async function (req, res) {
         res.status(400).json(`This function only accepts POST method, you tried: ${req.method} method.`);
     }
 
+    // TODO
+    // Verify if the product itself is available
+    // Verify if the product has enough ingredients to be available
+
     try {
         var { customer_name, total_amount, items } = req.body;
         var order = new Order({
@@ -51,7 +55,7 @@ app.post("/order", async function (req, res) {
 
         await order.save()
         .then((result) => {
-            console.log(result)
+            console.log(`Order created successfully: ${result}`)
         })
         .catch((error)=>{
             console.log(error)
@@ -63,7 +67,7 @@ app.post("/order", async function (req, res) {
     }
 
     for await (let element of items) {
-        await OrderItem.create({ingredient_id: element.ingredient_id, quantity: element.quantity, product_id: product.product_id})
+        await OrderItem.create({product_id: element.product_id, amount: element.amount, quantity: element.quantity, order_id: order.order_id})
         .then((success)=>{
             return element
         })
