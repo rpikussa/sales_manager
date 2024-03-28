@@ -1,6 +1,6 @@
 const express = require("express");
 const serverless = require("serverless-http");
-const { Ingredient } = require('../model/model.js');
+const { Order, OrderItem } = require('../model/model.js');
 
 const app = express()
 app.use(
@@ -11,18 +11,19 @@ app.use(
 app.use(express.json());
 
 // Get route by id with id being optional
-app.get("/ingredient/:id?", async function (req, res) {
+app.get("/order/:id?", async function (req, res) {
     
-    if(typeof req.params.id === undefined)
+    if(typeof req.params.id === undefined || req.params.id == "undefined" || req.params.id == "" || typeof req.params.id == "undefined")
     {
-        var { count, rows } = await Ingredient.findAndCountAll()
+        var { count, rows } = await Order.findAndCountAll({include: OrderItem})
 
     } else {
         var id = parseInt(req.params.id)
-        var { count, rows  } = await Ingredient.findAndCountAll({
+        var { count, rows  } = await Product.findAndCountAll({
             where: {
-                ingredient_id: id
-            }
+                order_id: id
+            },
+            include: OrderItem
         })
 
     }
@@ -35,42 +36,58 @@ app.get("/ingredient/:id?", async function (req, res) {
     res.status(200).json(response);
 })
 
-app.post("/ingredient", async function (req, res) {
+app.post("/order", async function (req, res) {
 
-    let statusCode = 201
-    let responseMessage = ""
     if (req.method !== 'POST') {
         res.status(400).json(`This function only accepts POST method, you tried: ${req.method} method.`);
     }
-       
+
     try {
-        var { name, available_quantity, description } = req.body;
+        var { customer_name, total_amount, items } = req.body;
+        var order = new Order({
+            customer_name: customer_name,
+            total_amount: total_amount
+        })
+
+        await order.save()
+        .then((result) => {
+            console.log(result)
+        })
+        .catch((error)=>{
+            console.log(error)
+            throw new Error(error)
+        })
+
     } catch (error) {
         res.status(400).json(`Failed to process your request body: ${error}`);
     }
-    
-    const responseData = await Ingredient.create({
-        name: name,
-        available_quantity: available_quantity,
-        description: description
-    }).then((success) => {
-        responseMessage = `Ingredient ${name} has been created successfully!`
-        console.log(responseMessage)
-        return success
-    }).catch((error) => {
-        responseMessage = `Failed creating the ingredient`
-        console.log(responseMessage)
-        statusCode = 500
-        return (error)
+
+    for await (let element of items) {
+        await OrderItem.create({ingredient_id: element.ingredient_id, quantity: element.quantity, product_id: product.product_id})
+        .then((success)=>{
+            return element
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+    }
+
+    const createdOrder = await Order.findOne({
+        where: {
+            order_id: order.order_id
+        },
+        include: OrderItem
     })
-    
+   
+    console.log(createdOrder.name)
     const response = {
-        statusCode: statusCode,
-        message: responseMessage,
-        body: responseData
+        statusCode: 201,
+        message: `Sucessfully created order ${createdOrder.name}`,
+        body: createdOrder
     };
 
-    res.status(statusCode).json(response);
+    res.status(201).json(response);
+
 })
 
 // Default 404 route for those routes that does not have any mapping here

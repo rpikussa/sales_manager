@@ -11,7 +11,7 @@ Resources:
   ManageIngredientFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ManageIngredient
+      FunctionName: IngredientApi
       Handler: src/ingredient/ingredient.handler
       Runtime: nodejs20.x
       FunctionUrlConfig:
@@ -56,7 +56,7 @@ Resources:
   ManageProductFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ManageProduct
+      FunctionName: ProductApi
       Handler: src/product/product.handler
       Runtime: nodejs20.x
       FunctionUrlConfig:
@@ -93,7 +93,50 @@ Resources:
           Properties:
             Path: /product
             Method: POST
-            
+
+  # -------------
+  # Order functions
+  # -------------
+  OrderApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: OrderApi
+      Handler: src/order/order.handler
+      Runtime: nodejs20.x
+      FunctionUrlConfig:
+        AuthType: NONE
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Saves an order and its related items to database
+      Policies: 
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:us-east-1:975050294854:secret:rds!db-40cc679a-fa7f-4db8-8e92-8a774bece408-NS9ggO
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0b233602b92cd70f7
+          - sg-0dd05095cd5969f99
+          - sg-04e86fcb5d64f05f3
+        SubnetIds:
+          - subnet-08ba2630ed2ad5086
+          - subnet-0a22fbe0af86e0a37
+          - subnet-0be71766173a5d34a
+          - subnet-0f692d61e6b80a341
+          - subnet-0a1beb2d590107236
+          - subnet-021e9ce96b9235bf7
+      Events:
+        OrderGetHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /order/{id}
+            Method: GET
+
+        OrderPostHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /order
+            Method: POST      
   
   # -------------
   # ------------- 
